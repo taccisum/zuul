@@ -45,6 +45,8 @@ import com.netflix.zuul.constants.ZuulHeaders;
 import com.netflix.zuul.util.DeepCopy;
 
 /**
+ * TODO:: 为什么RequestContext是一个ConcurrentHashMap？
+ * RequestContext是各filter之间进行消息传递的介质，其本质上是一个Map，这样就可以在上下文中存储任何kv pair
  * The Request Context holds request, response,  state information and data for ZuulFilters to access and share.
  * The RequestContext lives for the duration of the request and is ThreadLocal.
  * extensions of RequestContext can be substituted by setting the contextClass.
@@ -104,6 +106,7 @@ public class RequestContext extends ConcurrentHashMap<String, Object> {
     public static RequestContext getCurrentContext() {
         if (testContext != null) return testContext;
 
+        // currentContext是一个thread local对象，这样就不会与其它请求冲突
         RequestContext context = threadLocal.get();
         return context;
     }
@@ -298,7 +301,7 @@ public class RequestContext extends ConcurrentHashMap<String, Object> {
     /**
      * appends filter name and status to the filter execution history for the
      * current request
-     * 
+     *
      * @param name   filter name
      * @param status execution status
      * @param time   execution time in milliseconds
@@ -318,7 +321,7 @@ public class RequestContext extends ConcurrentHashMap<String, Object> {
         }
         return (StringBuilder) get("executedFilters");
     }
-    
+
     /**
      * sets the "responseBody" value as a String. This is the response sent back to the client.
      *

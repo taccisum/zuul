@@ -38,6 +38,7 @@ class Healthcheck extends StaticResponseFilter {
 
     @Override
     String filterType() {
+        // TODO:: 这个类型居然是healthcheck？在哪里用到的？
         return "healthcheck"
     }
 

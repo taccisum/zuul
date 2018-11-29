@@ -32,6 +32,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
+ * TODO:: 这些NF开头的类是干嘛用的？什么时候使用到？
+ * Netflix专用，可以无视
  * Extended RequestContext adding Netflix library specific concepts and data
  *
  * @author Mikey Cohen

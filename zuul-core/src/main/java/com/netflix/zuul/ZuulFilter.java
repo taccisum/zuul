@@ -72,6 +72,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
     abstract public int filterOrder();
 
     /**
+     * TODO:: 静态filter与非静态有什么不同？
      * By default ZuulFilters are static; they don't carry state. This may be overridden by overriding the isStaticFilter() property to false
      *
      * @return true by default
@@ -112,6 +113,7 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
                 // TODO:: tracer
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());
                 try {
+                    // 具体的filter逻辑执行的地方
                     Object res = run();
                     // wrap一下结果
                     zr = new ZuulFilterResult(res, ExecutionStatus.SUCCESS);

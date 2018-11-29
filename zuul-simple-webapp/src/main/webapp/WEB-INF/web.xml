@@ -3,14 +3,20 @@
          xmlns="http://java.sun.com/xml/ns/javaee" xmlns:web="http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
-  
+
     <listener>
+        <!-- 初始化zuul的listener -->
         <listener-class>com.netflix.zuul.StartServer</listener-class>
     </listener>
 
     <servlet>
         <servlet-name>ZuulServlet</servlet-name>
         <servlet-class>com.netflix.zuul.http.ZuulServlet</servlet-class>
+        <!-- 可以这样配置zuul -->
+        <!--<init-param>-->
+            <!--<param-name>buffer-requests</param-name>-->
+            <!--<param-value>true</param-value>-->
+        <!--</init-param>-->
     </servlet>
 
     <servlet-mapping>
@@ -26,5 +32,5 @@
         <filter-name>ContextLifecycleFilter</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
-  
+
 </web-app>

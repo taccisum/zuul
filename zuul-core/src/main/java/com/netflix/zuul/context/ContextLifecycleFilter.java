@@ -24,6 +24,7 @@ import javax.servlet.ServletResponse;
 import java.io.IOException;
 
 /**
+ * 这个是容器的过滤器，能确保请求执行完后context被unset
  * Manages Zuul <code>RequestContext</code> lifecycle.
  *
  * @author mhawthorne

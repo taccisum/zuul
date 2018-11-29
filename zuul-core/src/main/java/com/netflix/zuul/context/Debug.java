@@ -66,13 +66,14 @@ public class Debug {
     }
 
     /**
-     *
+     * TODO:: routiong错别字？
      * @return Returns the list of routiong debug messages
      */
     public static List<String> getRoutingDebug() {
         List<String> rd = (List<String>) RequestContext.getCurrentContext().get("routingDebug");
         if (rd == null) {
             rd = new ArrayList<String>();
+            // TODO::debug信息存在了routingDebug里，看看哪里打印出来
             RequestContext.getCurrentContext().set("routingDebug", rd);
         }
         return rd;
@@ -102,6 +103,7 @@ public class Debug {
 
 
     /**
+     * 逐个比对context各个key的的变化并将其添加到routingDebug这个key的val中
      * Adds debug details about changes that a given filter made to the request context.
      * @param filterName
      * @param copy
@@ -114,6 +116,7 @@ public class Debug {
             if ((!key.equals("routingDebug") && !key.equals("requestDebug"))) {
                 Object newValue = context.get(key);
                 Object oldValue = copy.get(key);
+                // TODO:: 为啥没有考虑oldValue不为null，newValue为null的情况？
                 if (oldValue == null && newValue != null) {
                     addRoutingDebug("{" + filterName + "} added " + key + "=" + newValue.toString());
                 } else if (oldValue != null && newValue != null) {

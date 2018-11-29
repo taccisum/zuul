@@ -90,6 +90,8 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
     }
 
     /**
+     * 这个方法通过动态属性解析来判断filter是否被禁用
+     * TODO:: 了解动态属性
      * If true, the filter has been disabled by archaius and will not be run
      *
      * @return
@@ -107,9 +109,11 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
         ZuulFilterResult zr = new ZuulFilterResult();
         if (!isFilterDisabled()) {
             if (shouldFilter()) {
+                // TODO:: tracer
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());
                 try {
                     Object res = run();
+                    // wrap一下结果
                     zr = new ZuulFilterResult(res, ExecutionStatus.SUCCESS);
                 } catch (Throwable e) {
                     t.setName("ZUUL::" + this.getClass().getSimpleName() + " failed");

@@ -38,6 +38,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
+ * 执行zuul filters的核心类
  * This the the core class to execute filters.
  *
  * @author Mikey Cohen
@@ -130,6 +131,7 @@ public class FilterProcessor {
      */
     public void preRoute() throws ZuulException {
         try {
+            // filter的类型是居然是写死的...至少也提供个枚举类嘛？
             runFilters("pre");
         } catch (ZuulException e) {
             throw e;
@@ -139,6 +141,7 @@ public class FilterProcessor {
     }
 
     /**
+     * 这个是真正执行filter的方法，每调用一次都会执行同一类型的所有filter
      * runs all filters of the filterType sType/ Use this method within filters to run custom filters by type
      *
      * @param sType the filterType.
@@ -146,16 +149,23 @@ public class FilterProcessor {
      * @throws Throwable throws up an arbitrary exception
      */
     public Object runFilters(String sType) throws Throwable {
+        // TODO:: debug routing？跟debug有关嘛？
         if (RequestContext.getCurrentContext().debugRouting()) {
             Debug.addRoutingDebug("Invoking {" + sType + "} type filters");
         }
         boolean bResult = false;
+        // TODO:: FilterLoader工作方式，后续了解
         List<ZuulFilter> list = FilterLoader.getInstance().getFiltersByType(sType);
         if (list != null) {
+            // TODO:: filter执行顺序？
+            // TODO:: ZuulFilter有个filterOrder()方法，应该跟这个有关，但是在哪里进行排序的？
+            // 这里没有进行try...catch... 意味着只要任何一个filter执行失败了整个过程就会中断掉
             for (int i = 0; i < list.size(); i++) {
                 ZuulFilter zuulFilter = list.get(i);
                 Object result = processZuulFilter(zuulFilter);
                 if (result != null && result instanceof Boolean) {
+                    // 这里写的是|=不是!=
+                    // TODO:: 为什么要用这种写法？直接赋值不行吗
                     bResult |= ((Boolean) result);
                 }
             }
@@ -164,6 +174,7 @@ public class FilterProcessor {
     }
 
     /**
+     * 执行单个zuul filter
      * Processes an individual ZuulFilter. This method adds Debug information. Any uncaught Thowables are caught by this method and converted to a ZuulException with a 500 status code.
      *
      * @param filter
@@ -180,20 +191,24 @@ public class FilterProcessor {
         try {
             long ltime = System.currentTimeMillis();
             filterName = filter.getClass().getSimpleName();
-            
+
             RequestContext copy = null;
             Object o = null;
             Throwable t = null;
 
             if (bDebug) {
                 Debug.addRoutingDebug("Filter " + filter.filterType() + " " + filter.filterOrder() + " " + filterName);
+                // copy了一份context用于debug
                 copy = ctx.copy();
             }
-            
+
             ZuulFilterResult result = filter.runFilter();
             ExecutionStatus s = result.getStatus();
+
+            // 统计了执行时间
             execTime = System.currentTimeMillis() - ltime;
 
+            // 这段对过滤器的执行状态进行记录
             switch (s) {
                 case FAILED:
                     t = result.getException();
@@ -210,9 +225,10 @@ public class FilterProcessor {
                 default:
                     break;
             }
-            
+
             if (t != null) throw t;
 
+            // TODO:: usageNotifier是啥
             usageNotifier.notify(filter, s);
             return o;
 
@@ -225,6 +241,7 @@ public class FilterProcessor {
                 throw (ZuulException) e;
             } else {
                 ZuulException ex = new ZuulException(e, "Filter threw Exception", 500, filter.filterType() + ":" + filterName);
+                // TODO:: 这个execTime??如果在line208之前抛出了异常岂不是为0？
                 ctx.addFilterExecutionSummary(filterName, ExecutionStatus.FAILED.name(), execTime);
                 throw ex;
             }
@@ -232,6 +249,7 @@ public class FilterProcessor {
     }
 
     /**
+     * TODO:: 这个usage notifier干啥的？后续了解
      * Publishes a counter metric for each filter on each use.
      */
     public static class BasicFilterUsageNotifier implements FilterUsageNotifier {

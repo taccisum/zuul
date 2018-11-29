@@ -43,6 +43,7 @@ import static org.mockito.Mockito.when;
  * Methods default to calling through to the wrapped request object,
  * except the ones that read the request's content (parameters, stream or reader).
  * <p/>
+ *
  * This class provides a buffered content reading that allows the methods
  * {@link #getReader()}, {@link #getInputStream()} and any of the getParameterXXX to be     called
  * safely and repeatedly with the same results.

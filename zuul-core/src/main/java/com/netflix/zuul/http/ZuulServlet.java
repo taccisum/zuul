@@ -47,6 +47,8 @@ import static org.mockito.Mockito.*;
 public class ZuulServlet extends HttpServlet {
 
     private static final long serialVersionUID = -3374242278843351500L;
+
+    // zuul servlet的所有具体操作都是交由这个ZuulRunner执行的
     private ZuulRunner zuulRunner;
 
 
@@ -63,13 +65,20 @@ public class ZuulServlet extends HttpServlet {
     @Override
     public void service(javax.servlet.ServletRequest servletRequest, javax.servlet.ServletResponse servletResponse) throws ServletException, IOException {
         try {
+            // 初始化当前的zuul request context，将request和response放入上下文中
             init((HttpServletRequest) servletRequest, (HttpServletResponse) servletResponse);
 
             // Marks this request as having passed through the "Zuul engine", as opposed to servlets
             // explicitly bound in web.xml, for which requests will not have the same data attached
             RequestContext context = RequestContext.getCurrentContext();
+            // 为此次请求设置标识
             context.setZuulEngineRan();
 
+            // 以下几个try块部分是zuul对一个请求的处理流程：pre -> route -> post
+            // 可以看到：
+            // 1. post是必然执行的（可以类比finally块），但如果在post中抛出了异常，交由error处理完后就结束，避免无限循环
+            // 2. 任何阶段抛出了ZuulException，都会交由error处理
+            // 3. 非ZuulException会被封装后交给error处理（理论上不可能出现，因为这些方法里面都将未知异常转换成了ZuulException）
             try {
                 preRoute();
             } catch (ZuulException e) {
@@ -94,6 +103,7 @@ public class ZuulServlet extends HttpServlet {
         } catch (Throwable e) {
             error(new ZuulException(e, 500, "UNHANDLED_EXCEPTION_" + e.getClass().getName()));
         } finally {
+            // TODO:: 重置context，后续了解
             RequestContext.getCurrentContext().unset();
         }
     }
@@ -175,6 +185,7 @@ public class ZuulServlet extends HttpServlet {
                 RequestContext.testSetCurrentContext(context);
                 when(servletResponse.getWriter()).thenReturn(writer);
 
+                // TODO:: 这个单元测试跑到这里就空指针异常了，不知道搞毛
                 zuulServlet.init(servletRequest, servletResponse);
                 verify(zuulServlet, times(1)).init(servletRequest, servletResponse);
                 assertTrue(RequestContext.getCurrentContext().getRequest() instanceof HttpServletRequestWrapper);

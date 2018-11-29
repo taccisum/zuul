@@ -24,6 +24,7 @@ package com.netflix.zuul;
  */
 public interface IZuulFilter {
     /**
+     * 通过这个方法的执行结果判断是否需要由当前filter处理此次请求
      * a "true" return from this method means that the run() method should be invoked
      *
      * @return true if the run() method should be invoked. false will not invoke the run() method
@@ -31,6 +32,7 @@ public interface IZuulFilter {
     boolean shouldFilter();
 
     /**
+     * filter的实际执行方法
      * if shouldFilter() is true, this method will be invoked. this method is the core method of a ZuulFilter
      *
      * @return Some arbitrary artifact may be returned. Current implementation ignores it.

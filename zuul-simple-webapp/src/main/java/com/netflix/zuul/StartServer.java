@@ -36,6 +36,7 @@ public class StartServer implements ServletContextListener {
         logger.info("starting server");
 
         // mocks monitoring infrastructure as we don't need it for this simple app
+        // TODO:: zuul monitor
         MonitoringHelper.initMocks();
 
         // initializes groovy filesystem poller
@@ -53,6 +54,7 @@ public class StartServer implements ServletContextListener {
     private void initGroovyFilterManager() {
         FilterLoader.getInstance().setCompiler(new GroovyCompiler());
 
+        // 获取groovy脚本的根目录，在jettyRun.doFirst中赋值了
         String scriptRoot = System.getProperty("zuul.filter.root", "");
         if (scriptRoot.length() > 0) scriptRoot = scriptRoot + File.separator;
         try {

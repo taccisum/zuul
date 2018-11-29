@@ -45,6 +45,7 @@ class DebugFilter extends ZuulFilter {
     }
 
     Object run() {
+        // 从动态配置源获取到filter的debug配置，然后设置到当前请求的上下文中作为之后执行的filter是否执行debug代码的依据
         RequestContext.getCurrentContext().setDebugRequest(true)
         RequestContext.getCurrentContext().setDebugRouting(true)
         return null;

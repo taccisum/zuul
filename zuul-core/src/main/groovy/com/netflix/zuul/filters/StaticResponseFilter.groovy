@@ -23,6 +23,8 @@ import com.netflix.zuul.ZuulFilter
 import com.netflix.zuul.context.RequestContext
 
 /**
+ * 静态资源过滤器
+ *
  * Abstract class to return content directly fron Zuul,
  * If this filter is executed, the  "route" filters will be bypassed,
  * so the request will not be forwarded to an origin.
@@ -54,6 +56,7 @@ public abstract class StaticResponseFilter extends ZuulFilter {
     }
 
     boolean shouldFilter() {
+        // 只有在匹配uri()这个抽象方法指定的路径时才执行
         String path = RequestContext.currentContext.getRequest().getRequestURI()
         if (checkPath(path)) return true
         if (checkPath("/" + path)) return true
@@ -83,8 +86,11 @@ public abstract class StaticResponseFilter extends ZuulFilter {
         // Set the default response code for static filters to be 200
         ctx.setResponseStatusCode(HttpServletResponse.SC_OK)
         // first StaticResponseFilter instance to match wins, others do not set body and/or status
+        // 避免覆盖其它static过滤器设置的内容
         if (ctx.getResponseBody() == null) {
+            // 返回由抽象方法responseBody()指定的特定响应内容
             ctx.setResponseBody(responseBody())
+            // 因为访问的是zuul静态内容，所以将sendZuulResponse设置为false
             ctx.sendZuulResponse = false;
         }
     }

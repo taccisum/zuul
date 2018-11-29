@@ -61,6 +61,8 @@ import com.netflix.zuul.constants.ZuulConstants;
 import com.netflix.zuul.util.JsonUtility;
 
 /**
+ * 用于管理Filter脚本的Servlet
+ *
  * Servlet for uploading/downloading/managing scripts.
  * <p/>
  * <ul>
@@ -74,7 +76,7 @@ import com.netflix.zuul.util.JsonUtility;
 public class FilterScriptManagerServlet extends HttpServlet {
 
     public static final DynamicStringProperty redirectPath = new DynamicStringProperty(ZuulConstants.ZUUL_FILTER_ADMIN_REDIRECT, "filterLoader.jsp");
-    
+
     private static final long serialVersionUID = -1L;
     private static final Logger logger = LoggerFactory.getLogger(FilterScriptManagerServlet.class);
 

@@ -28,6 +28,8 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
+ * 收集filter执行过程中的统计信息并输出
+ *
  * @author Mikey Cohen
  * Date: 2/3/12
  * Time: 2:48 PM

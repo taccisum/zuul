@@ -76,6 +76,7 @@ public class StartServer extends GuiceServletContextListener {
 
     private static final DynamicBooleanProperty cassandraEnabled = DynamicPropertyFactory.getInstance().getBooleanProperty(ZUUL_CASSANDRA_ENABLED, true);
     private static Logger LOG = LoggerFactory.getLogger(StartServer.class);
+    // TODO:: karyon server??
     private final KaryonServer server;
 
     public StartServer() {
@@ -129,6 +130,7 @@ public class StartServer extends GuiceServletContextListener {
         initPlugins();
         initZuul();
         initCassandra();
+        // NIWS: Netflix Internal Web Service
         initNIWS();
 
         ApplicationInfoManager.getInstance().setInstanceStatus(InstanceInfo.InstanceStatus.UP);

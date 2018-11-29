@@ -55,10 +55,12 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
 
     Object run() {
         NFRequestContext ctx = NFRequestContext.getCurrentContext();
+        // TODO:: 这个event是干嘛的，在哪里用到？
         final Map<String, Object> event = ctx.getEventProperties();
 
         try {
             captureRequestData(event, ctx.request);
+            // TODO:: 好像还跟eureka有关？
             captureInstanceData(event);
 
 

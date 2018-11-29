@@ -38,7 +38,8 @@ class Healthcheck extends StaticResponseFilter {
 
     @Override
     String filterType() {
-        // TODO:: 这个类型居然是healthcheck？在哪里用到的？
+        // 这个类型是healthcheck，在Routing中通过FilterProcessor.instance.runFilters("healthcheck")执行
+        // TODO:: healthcheck也是静态内容，不知道为什么要特地将类型改写为healthcheck
         return "healthcheck"
     }
 
@@ -49,6 +50,7 @@ class Healthcheck extends StaticResponseFilter {
 
     @Override
     String responseBody() {
+        // 只返回了一个ok...过于地粗暴了吧 - -
         RequestContext.getCurrentContext().getResponse().setContentType('application/xml')
         return "<health>ok</health>"
     }

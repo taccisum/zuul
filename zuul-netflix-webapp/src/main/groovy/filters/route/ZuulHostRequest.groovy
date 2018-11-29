@@ -62,6 +62,7 @@ import java.util.zip.GZIPInputStream
 
 /**
  * TODO:: ZuulHostRequest是一个route类型的filter，主要根据host来转发请求
+ * TODO:: ZuulHostRequest跟ZuulNFRequest都有，到底执行哪个filter？
  */
 class ZuulHostRequest extends ZuulFilter {
 
@@ -131,6 +132,7 @@ class ZuulHostRequest extends ZuulFilter {
     }
 
     boolean shouldFilter() {
+        // 如果routeHost为空或者sendZuulResponse为false，则不执行此过滤器（即不进行转发）
         return RequestContext.currentContext.getRouteHost() != null && RequestContext.currentContext.sendZuulResponse()
     }
 

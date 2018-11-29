@@ -36,6 +36,8 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
+ * TODO:: 好像是用来做负载均衡的？
+ *
  * @author Mikey Cohen
  * Date: 7/9/12
  * Time: 1:19 PM

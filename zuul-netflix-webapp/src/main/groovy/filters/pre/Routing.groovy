@@ -26,6 +26,8 @@ import com.netflix.zuul.context.RequestContext
 import com.netflix.zuul.exception.ZuulException
 
 /**
+ * 这个过滤器中负责执行static过滤器
+ *
  * @author Mikey Cohen
  * Date: 1/23/13
  * Time: 2:03 PM
@@ -59,6 +61,7 @@ class Routing extends ZuulFilter {
 
         staticRouting() //runs the static Zuul
 
+        // TODO:: 下面的好像是netflix专用的代码，暂时忽略
         ((NFRequestContext) RequestContext.currentContext).routeVIP = defaultClient.get()
         String host = defaultHost.get()
         if (((NFRequestContext) RequestContext.currentContext).routeVIP == null) ((NFRequestContext) RequestContext.currentContext).routeVIP = ZuulApplicationInfo.applicationName

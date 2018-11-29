@@ -165,7 +165,7 @@ public class FilterProcessor {
                 Object result = processZuulFilter(zuulFilter);
                 if (result != null && result instanceof Boolean) {
                     // 这里写的是|=不是!=
-                    // TODO:: 为什么要用这种写法？直接赋值不行吗
+                    // TODO:: 为什么要用这种写法？既然只有result为boolean类型时才执行，直接赋值不行吗
                     bResult |= ((Boolean) result);
                 }
             }

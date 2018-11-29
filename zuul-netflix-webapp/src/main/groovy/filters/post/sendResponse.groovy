@@ -76,12 +76,14 @@ class sendResponse extends ZuulFilter {
         OutputStream outStream = servletResponse.getOutputStream();
         InputStream is = null
         try {
+            // 如果上下文中设置了responseBody，则覆盖掉原来的输出
             if (RequestContext.currentContext.responseBody != null) {
                 String body = RequestContext.currentContext.responseBody
                 writeResponse(new ByteArrayInputStream(body.getBytes(Charset.forName("UTF-8"))), outStream)
                 return;
             }
 
+            // 判断请求是否能接收gzip压缩
             boolean isGzipRequested = false
             final String requestEncoding = context.getRequest().getHeader(ZuulHeaders.ACCEPT_ENCODING)
             if (requestEncoding != null && requestEncoding.equals("gzip"))
@@ -94,6 +96,7 @@ class sendResponse extends ZuulFilter {
                     // if origin response is gzipped, and client has not requested gzip, decompress stream
                     // before sending to client
                     // else, stream gzip directly to client
+                    // 如果原始响应是gzip压缩的，但请求客户端并不接受gzip，就解压后再返回，否则直接返回gzip响应
                     if (context.getResponseGZipped() && !isGzipRequested)
                         try {
                             inputStream = new GZIPInputStream(is);
@@ -146,6 +149,7 @@ class sendResponse extends ZuulFilter {
     private void addResponseHeaders() {
         RequestContext context = RequestContext.getCurrentContext();
         HttpServletResponse servletResponse = context.getResponse();
+        // 额外添加的zuul响应头，可能是在更早的post过滤器中添加的
         List<Pair<String, String>> zuulResponseHeaders = context.getZuulResponseHeaders();
         String debugHeader = ""
 
@@ -163,8 +167,10 @@ class sendResponse extends ZuulFilter {
         }
         */
 
-        if (INCLUDE_DEBUG_HEADER.get()) servletResponse.addHeader("X-Zuul-Debug-Header", debugHeader)
+        if (INCLUDE_DEBUG_HEADER.get())
+            servletResponse.addHeader("X-Zuul-Debug-Header", debugHeader)
 
+        // 为response添加响应头
         if (Debug.debugRequest()) {
             zuulResponseHeaders?.each { Pair<String, String> it ->
                 servletResponse.addHeader(it.first(), it.second())

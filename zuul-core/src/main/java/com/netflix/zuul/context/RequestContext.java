@@ -68,6 +68,7 @@ public class RequestContext extends ConcurrentHashMap<String, Object> {
         @Override
         protected RequestContext initialValue() {
             try {
+                // 上下文实例类型取决于contextClass，例如在NFRequestContext中就改写了contextClass
                 return contextClass.newInstance();
             } catch (Throwable e) {
                 throw new RuntimeException(e);

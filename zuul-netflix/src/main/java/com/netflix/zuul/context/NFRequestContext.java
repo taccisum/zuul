@@ -32,8 +32,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 /**
- * TODO:: 这些NF开头的类是干嘛用的？什么时候使用到？
- * Netflix专用，可以无视
+ * RequestContext扩展，提供了一些与netflix库特定概念和数据相关的key
  * Extended RequestContext adding Netflix library specific concepts and data
  *
  * @author Mikey Cohen
@@ -42,6 +41,9 @@ import static org.junit.Assert.assertNotNull;
  */
 public class NFRequestContext extends RequestContext {
 
+    /**
+     * TODO:: {@link com.netflix.zuul.stats.ZuulEvent}
+     */
     private static final String EVENT_PROPS_KEY = "eventProperties";
 
 
@@ -69,6 +71,7 @@ public class NFRequestContext extends RequestContext {
     }
 
     /**
+     * 与Eureka虚拟ip概念相关
      * returns the routeVIP; that is the Eureka "vip" of registered instances
      *
      * @return
@@ -140,6 +143,7 @@ public class NFRequestContext extends RequestContext {
     }
 
     /**
+     * TODO:: 这是要路由到的服务名？？
      * returns the "route". This is a Zuul defined bucket for collecting request metrics. By default the route is the
      * first segment of the uri  eg /get/my/stuff : route is "get"
      *

@@ -38,6 +38,7 @@ import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 /**
+ * TODO:: 跟ZuulServlet有什么关系？ 很多逻辑都是一样的
  * Zuul Servlet filter to run Zuul within a Servlet Filter. The filter invokes pre-routing filters first,
  * then routing filters, then post routing filters. Handled exceptions in pre-routing and routing
  * call the error filters, then call post-routing filters. Errors in post-routing only invoke the error filters.
@@ -71,13 +72,13 @@ public class ZuulServletFilter implements Filter {
                 postRouting();
                 return;
             }
-            
+
             // Only forward onto to the chain if a zuul response is not being sent
             if (!RequestContext.getCurrentContext().sendZuulResponse()) {
                 filterChain.doFilter(servletRequest, servletResponse);
                 return;
             }
-            
+
             try {
                 routing();
             } catch (ZuulException e) {

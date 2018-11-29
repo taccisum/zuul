@@ -45,6 +45,7 @@ class Postfilter extends ZuulFilter {
     }
 
     Object run() {
+        // 为响应添加一些header
         addStandardResponseHeaders(RequestContext.getCurrentContext().getRequest(), RequestContext.getCurrentContext().getResponse())
         return null;
     }

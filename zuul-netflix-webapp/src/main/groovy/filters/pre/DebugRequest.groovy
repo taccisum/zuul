@@ -29,6 +29,8 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
+ * 负责添加Request的debug信息的过滤器
+ *
  * @author Mikey Cohen
  * Date: 3/12/12
  * Time: 1:51 PM

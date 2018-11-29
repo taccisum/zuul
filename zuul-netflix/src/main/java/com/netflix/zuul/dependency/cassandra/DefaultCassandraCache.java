@@ -36,6 +36,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 /**
+ * Cassandra是一个no sql数据库
+ * astyanax是一个cassandra客户端
+ *
  * Simple in memory cache implementation, backed by a Map.
  */
 public class DefaultCassandraCache<K> implements CassandraCache<K> {

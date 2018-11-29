@@ -60,6 +60,9 @@ import javax.servlet.http.HttpServletResponse
 import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.GZIPInputStream
 
+/**
+ * TODO:: ZuulHostRequest是一个route类型的filter，主要根据host来转发请求
+ */
 class ZuulHostRequest extends ZuulFilter {
 
     public static final String CONTENT_ENCODING = "Content-Encoding";
@@ -174,17 +177,22 @@ class ZuulHostRequest extends ZuulFilter {
 
     Object run() {
         HttpServletRequest request = RequestContext.currentContext.getRequest();
+        // 构建zuul headers，这里可能会对原请求头做一些处理（如果在context中设置了相关的内容）
         Header[] headers = buildZuulRequestHeaders(request)
+        // 获取HTTP动词，即GET/POST之类
         String verb = getVerb(request);
         InputStream requestEntity = getRequestBody(request)
         HttpClient httpclient = CLIENT.get()
 
         String uri = request.getRequestURI()
         if (RequestContext.currentContext.requestURI != null) {
+            // TODO:: 待调试
+            // 通过为上下文添加requestURI可以覆盖原uri
             uri = RequestContext.currentContext.requestURI
         }
 
         try {
+            // 转发请求并将响应保存到上下文，之后交由post filter处理
             HttpResponse response = forward(httpclient, verb, uri, request, headers, requestEntity)
             setResponse(response)
         } catch (Exception e) {
@@ -193,6 +201,7 @@ class ZuulHostRequest extends ZuulFilter {
         return null
     }
 
+    // TODO:: 后续了解
     def fallback() {
         final NFRequestContext ctx = NFRequestContext.getCurrentContext();
 
@@ -238,7 +247,7 @@ class ZuulHostRequest extends ZuulFilter {
     }
 
     def HttpResponse forward(HttpClient httpclient, String verb, String uri, HttpServletRequest request, Header[] headers, InputStream requestEntity) {
-
+        // 如果开启了debugRequest的话，这里会返回一个wrap过的requestEntity(debugRequestEntity)用于debug
         requestEntity = debug(httpclient, verb, uri, request, headers, requestEntity)
 
         org.apache.http.HttpHost httpHost
@@ -269,6 +278,7 @@ class ZuulHostRequest extends ZuulFilter {
 
 
         } finally {
+            // TODO:: 为什么注释掉了？
             // When HttpClient instance is no longer needed,
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
@@ -278,6 +288,8 @@ class ZuulHostRequest extends ZuulFilter {
     }
 
     HttpResponse executeHttpRequest(HttpClient httpclient, HttpHost httpHost, HttpRequest httpRequest) {
+        // 通过hystrix command封装请求
+        // TODO:: 有关hystrix的内容暂不深究
         HostCommand command = new HostCommand(httpclient, httpHost, httpRequest)
         command.execute();
     }
@@ -290,6 +302,7 @@ class ZuulHostRequest extends ZuulFilter {
 
     HttpHost getHttpHost() {
         HttpHost httpHost
+        // TODO:: routeHost是在哪里赋值的？
         URL host = RequestContext.currentContext.getRouteHost()
 
         httpHost = new HttpHost(host.getHost(), host.getPort(), host.getProtocol())
@@ -301,6 +314,7 @@ class ZuulHostRequest extends ZuulFilter {
     def getRequestBody(HttpServletRequest request) {
         Object requestEntity = null;
         try {
+            // Netflix用的，可以跳过
             requestEntity = NFRequestContext.currentContext.requestEntity
             if (requestEntity == null) {
                 requestEntity = request.getInputStream();
@@ -321,7 +335,8 @@ class ZuulHostRequest extends ZuulFilter {
 
 
     def Header[] buildZuulRequestHeaders(HttpServletRequest request) {
-        Map headers = new HashMap()
+        Map headers = new HashMap()     // Map<String, BasicHeader>
+        // 处理原请求头
         Enumeration headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String name = (String) headerNames.nextElement();
@@ -338,6 +353,7 @@ class ZuulHostRequest extends ZuulFilter {
             }
         }
 
+        // 处理pre filter添加的zuul请求头
         Map zuulRequestHeaders = RequestContext.getCurrentContext().getZuulRequestHeaders();
 
         zuulRequestHeaders.keySet().each {

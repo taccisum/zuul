@@ -61,8 +61,8 @@ import java.util.concurrent.atomic.AtomicReference
 import java.util.zip.GZIPInputStream
 
 /**
- * TODO:: ZuulHostRequest是一个route类型的filter，主要根据host来转发请求
- * TODO:: ZuulHostRequest跟ZuulNFRequest都有，到底执行哪个filter？
+ * ZuulHostRequest是一个route类型的filter，根据host来转发请求
+ * host的值根据上下文变量routeHost取得
  */
 class ZuulHostRequest extends ZuulFilter {
 
@@ -132,7 +132,7 @@ class ZuulHostRequest extends ZuulFilter {
     }
 
     boolean shouldFilter() {
-        // 如果routeHost为空或者sendZuulResponse为false，则不执行此过滤器（即不进行转发）
+        // 如果routeHost不为空，则说明此次请求是转发到指定host，由此过滤器进行处理，否则由ZuulNFRequest进行处理
         return RequestContext.currentContext.getRouteHost() != null && RequestContext.currentContext.sendZuulResponse()
     }
 
@@ -179,7 +179,7 @@ class ZuulHostRequest extends ZuulFilter {
 
     Object run() {
         HttpServletRequest request = RequestContext.currentContext.getRequest();
-        // 构建zuul headers，这里可能会对原请求头做一些处理（如果在context中设置了相关的内容）
+        // 构建请求headers，会包括原请求请求头和zuul添加的请求头
         Header[] headers = buildZuulRequestHeaders(request)
         // 获取HTTP动词，即GET/POST之类
         String verb = getVerb(request);
@@ -188,13 +188,12 @@ class ZuulHostRequest extends ZuulFilter {
 
         String uri = request.getRequestURI()
         if (RequestContext.currentContext.requestURI != null) {
-            // TODO:: 待调试
-            // 通过为上下文添加requestURI可以覆盖原uri
+            // 如果在之前的过滤器中为上下文添加了requestURI，则覆盖掉原uri
             uri = RequestContext.currentContext.requestURI
         }
 
         try {
-            // 转发请求并将响应保存到上下文，之后交由post filter处理
+            // 转发请求并将响应保存到上下文
             HttpResponse response = forward(httpclient, verb, uri, request, headers, requestEntity)
             setResponse(response)
         } catch (Exception e) {
@@ -277,20 +276,17 @@ class ZuulHostRequest extends ZuulFilter {
             httpRequest.setHeaders(headers)
             HttpResponse zuulResponse = executeHttpRequest(httpclient, httpHost, httpRequest)
             return zuulResponse
-
-
         } finally {
-            // TODO:: 为什么注释掉了？
             // When HttpClient instance is no longer needed,
             // shut down the connection manager to ensure
             // immediate deallocation of all system resources
+            // 这行被注释掉了，可能因为之前用的client不是静态变量，现在换成静态变量后就不需要在这里释放连接了
 //            httpclient.getConnectionManager().shutdown();
         }
-
     }
 
     HttpResponse executeHttpRequest(HttpClient httpclient, HttpHost httpHost, HttpRequest httpRequest) {
-        // 通过hystrix command封装请求
+        // 封装成hystrix command执行
         // TODO:: 有关hystrix的内容暂不深究
         HostCommand command = new HostCommand(httpclient, httpHost, httpRequest)
         command.execute();
@@ -338,7 +334,7 @@ class ZuulHostRequest extends ZuulFilter {
 
     def Header[] buildZuulRequestHeaders(HttpServletRequest request) {
         Map headers = new HashMap()     // Map<String, BasicHeader>
-        // 处理原请求头
+        // 收集原请求头
         Enumeration headerNames = request.getHeaderNames();
         while (headerNames.hasMoreElements()) {
             String name = (String) headerNames.nextElement();
@@ -355,13 +351,14 @@ class ZuulHostRequest extends ZuulFilter {
             }
         }
 
-        // 处理pre filter添加的zuul请求头
+        // 收集zuul请求头（即在之前的filter中添加的请求头）
         Map zuulRequestHeaders = RequestContext.getCurrentContext().getZuulRequestHeaders();
 
         zuulRequestHeaders.keySet().each {
             headers.put(it.toLowerCase(),new BasicHeader((String) it, (String) zuulRequestHeaders[it]))
         }
 
+        // 如果开启了gzip压缩，则添加相应请求头
         if (RequestContext.currentContext.responseGZipped) {
             headers.put("accept-encoding",new BasicHeader("accept-encoding", "deflate, gzip"))
         }

@@ -75,11 +75,13 @@ class ZuulNFRequest extends ZuulFilter {
         NFRequestContext context = NFRequestContext.currentContext
         HttpServletRequest request = context.getRequest();
 
+        // 构建请求headers，会包括原请求请求头和zuul添加的请求头
         MultivaluedMap<String, String> headers = buildZuulRequestHeaders(request)
+        // 构建请求参数
         MultivaluedMap<String, String> params = buildZuulRequestQueryParams(request)
         Verb verb = getVerb(request);
         Object requestEntity = getRequestBody(request)
-        // 通过eureka实例id获取到相应的client
+        // 通过routeVIP获取到相应的ribbon客户端
         IClient restClient = ClientFactory.getNamedClient(context.getRouteVIP());
 
         String uri = request.getRequestURI()
@@ -145,9 +147,10 @@ class ZuulNFRequest extends ZuulFilter {
         route = route.replace("/", "_")
 
 
+        // 封装成ribbon hystrix command执行
         RibbonCommand command = new RibbonCommand(restClient, verb, uri, headers, params, requestEntity);
         try {
-            HttpResponse response = command.execute();  //同步执行hystrix command
+            HttpResponse response = command.execute();
             return response
         } catch (HystrixRuntimeException e) {
             if (e?.fallbackException?.cause instanceof ClientException) {

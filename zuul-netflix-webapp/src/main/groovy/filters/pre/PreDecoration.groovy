@@ -57,11 +57,13 @@ public class PreDecoration extends ZuulFilter {
     Object run() {
         if (RequestContext.currentContext.getRequest().getParameter("url") != null) {
             try {
-                // TODO:: routeHost有什么用？
+                // routeHost通过请求的参数url指定
+                // 如果routeHost有值，则在route阶段会由ZuulHostRequest进行处理
                 RequestContext.getCurrentContext().routeHost = new URL(RequestContext.currentContext.getRequest().getParameter("url"))
                 // 开启GZip
                 RequestContext.currentContext.setResponseGZipped(true)
             } catch (MalformedURLException e) {
+                // url格式错误，返回400
                 throw new ZuulException(e, "Malformed URL", 400, "MALFORMED_URL")
             }
         }

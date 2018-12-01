@@ -73,7 +73,6 @@ public class Debug {
         List<String> rd = (List<String>) RequestContext.getCurrentContext().get("routingDebug");
         if (rd == null) {
             rd = new ArrayList<String>();
-            // TODO::debug信息存在了routingDebug里，看看哪里打印出来
             RequestContext.getCurrentContext().set("routingDebug", rd);
         }
         return rd;

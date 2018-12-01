@@ -158,8 +158,6 @@ public class FilterProcessor {
         // 通过FilterLoader获取指定类型的所有filter
         List<ZuulFilter> list = FilterLoader.getInstance().getFiltersByType(sType);
         if (list != null) {
-            // TODO:: filter执行顺序？
-            // TODO:: ZuulFilter有个filterOrder()方法，应该跟这个有关，但是在哪里进行排序的？
             // 这里没有进行try...catch... 意味着只要任何一个filter执行失败了整个过程就会中断掉
             for (int i = 0; i < list.size(); i++) {
                 ZuulFilter zuulFilter = list.get(i);

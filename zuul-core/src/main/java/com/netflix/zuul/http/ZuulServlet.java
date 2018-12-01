@@ -187,7 +187,6 @@ public class ZuulServlet extends HttpServlet {
                 RequestContext.testSetCurrentContext(context);
                 when(servletResponse.getWriter()).thenReturn(writer);
 
-                // TODO:: 这个单元测试跑到这里就空指针异常了，不知道搞毛
                 zuulServlet.init(servletRequest, servletResponse);
                 verify(zuulServlet, times(1)).init(servletRequest, servletResponse);
                 assertTrue(RequestContext.getCurrentContext().getRequest() instanceof HttpServletRequestWrapper);

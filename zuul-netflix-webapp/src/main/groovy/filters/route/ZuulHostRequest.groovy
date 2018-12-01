@@ -202,7 +202,6 @@ class ZuulHostRequest extends ZuulFilter {
         return null
     }
 
-    // TODO:: 后续了解
     def fallback() {
         final NFRequestContext ctx = NFRequestContext.getCurrentContext();
 
@@ -287,7 +286,6 @@ class ZuulHostRequest extends ZuulFilter {
 
     HttpResponse executeHttpRequest(HttpClient httpclient, HttpHost httpHost, HttpRequest httpRequest) {
         // 封装成hystrix command执行
-        // TODO:: 有关hystrix的内容暂不深究
         HostCommand command = new HostCommand(httpclient, httpHost, httpRequest)
         command.execute();
     }
@@ -300,7 +298,6 @@ class ZuulHostRequest extends ZuulFilter {
 
     HttpHost getHttpHost() {
         HttpHost httpHost
-        // TODO:: routeHost是在哪里赋值的？
         URL host = RequestContext.currentContext.getRouteHost()
 
         httpHost = new HttpHost(host.getHost(), host.getPort(), host.getProtocol())

@@ -57,7 +57,7 @@ public class FilterLoader {
     private final ConcurrentHashMap<String, Long> filterClassLastModified = new ConcurrentHashMap<String, Long>();
     private final ConcurrentHashMap<String, String> filterClassCode = new ConcurrentHashMap<String, String>();
     private final ConcurrentHashMap<String, String> filterCheck = new ConcurrentHashMap<String, String>();
-    // TODO:: 缓存所有filter的map，依据type进行分类
+    // TODO:: 缓存所有filter的map，依据type进行分类。 filter registry变动时如果刷新缓存？
     private final ConcurrentHashMap<String, List<ZuulFilter>> hashFiltersByType = new ConcurrentHashMap<String, List<ZuulFilter>>();
 
     private FilterRegistry filterRegistry = FilterRegistry.instance();

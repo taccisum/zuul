@@ -89,7 +89,6 @@ class Routing extends ZuulFilter {
         }
 
         // 截取路径的第一段为route
-        // TODO:: 这个route有什么用，也暂时没发现
         ((NFRequestContext) RequestContext.currentContext).route = uri.substring(0, uri.indexOf("/") + 1)
     }
 }

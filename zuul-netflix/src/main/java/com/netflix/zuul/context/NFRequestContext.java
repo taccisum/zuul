@@ -41,9 +41,6 @@ import static org.junit.Assert.assertNotNull;
  */
 public class NFRequestContext extends RequestContext {
 
-    /**
-     * TODO:: {@link com.netflix.zuul.stats.ZuulEvent}
-     */
     private static final String EVENT_PROPS_KEY = "eventProperties";
 
 
@@ -143,7 +140,6 @@ public class NFRequestContext extends RequestContext {
     }
 
     /**
-     * TODO:: 这是要路由到的服务名？？
      * returns the "route". This is a Zuul defined bucket for collecting request metrics. By default the route is the
      * first segment of the uri  eg /get/my/stuff : route is "get"
      *

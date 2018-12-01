@@ -188,7 +188,7 @@ public class StartServer extends GuiceServletContextListener {
         RequestContext.setContextClass(NFRequestContext.class);
 
         // 初始化监控相关的类
-        // TODO:: 似乎与initPlugins()中重复执行了？
+        // initPlugins()中重复执行了
         CounterFactory.initialize(new Counter());
         TracerFactory.initialize(new Tracer());
 

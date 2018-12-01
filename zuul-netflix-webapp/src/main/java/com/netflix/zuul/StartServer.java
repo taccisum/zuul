@@ -76,7 +76,7 @@ public class StartServer extends GuiceServletContextListener {
 
     private static final DynamicBooleanProperty cassandraEnabled = DynamicPropertyFactory.getInstance().getBooleanProperty(ZUUL_CASSANDRA_ENABLED, true);
     private static Logger LOG = LoggerFactory.getLogger(StartServer.class);
-    // TODO:: karyon server??
+    // Netflix Karyon Server: https://github.com/Netflix/karyon
     private final KaryonServer server;
 
     public StartServer() {
@@ -125,15 +125,19 @@ public class StartServer extends GuiceServletContextListener {
     }
 
     protected void initialize() throws Exception {
-
+        // 这个操作是触发静态变量AmazonInfoHolder.INFO的初始化，并不是没有意义的
         AmazonInfoHolder.getInfo();
+        // 监控、度量等初始化
         initPlugins();
+        // 动态Filter等相关类的初始化
         initZuul();
+        // cassandra初始化
         initCassandra();
         // NIWS: Netflix Internal Web Service
-        // 主要是初始化ribbon的一些配置
+        // 主要是初始化ribbon的客户端之类的
         initNIWS();
 
+        // 初始化完成，修改eureka实例的状态为up
         ApplicationInfoManager.getInstance().setInstanceStatus(InstanceInfo.InstanceStatus.UP);
     }
 
@@ -183,6 +187,8 @@ public class StartServer extends GuiceServletContextListener {
 
         RequestContext.setContextClass(NFRequestContext.class);
 
+        // 初始化监控相关的类
+        // TODO:: 似乎与initPlugins()中重复执行了？
         CounterFactory.initialize(new Counter());
         TracerFactory.initialize(new Tracer());
 
@@ -194,9 +200,12 @@ public class StartServer extends GuiceServletContextListener {
         final String routingFiltersPath = config.getString(ZUUL_FILTER_ROUTING_PATH);
         final String customPath = config.getString(ZUUL_FILTER_CUSTOM_PATH);
 
+        // 动态Filter相关配置
+        // 这里只配置了Groovy的filter，如果需要加载Java filter可以参考zuul-simple-webapp的StartServer
         FilterLoader.getInstance().setCompiler(new GroovyCompiler());
         FilterFileManager.setFilenameFilter(new GroovyFileFilter());
         if (customPath == null) {
+            // 5秒刷新一次
             FilterFileManager.init(5, preFiltersPath, postFiltersPath, routingFiltersPath);
         } else {
             FilterFileManager.init(5, preFiltersPath, postFiltersPath, routingFiltersPath, customPath);

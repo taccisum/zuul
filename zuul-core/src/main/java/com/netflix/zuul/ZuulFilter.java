@@ -108,7 +108,9 @@ public abstract class ZuulFilter implements IZuulFilter, Comparable<ZuulFilter> 
      */
     public ZuulFilterResult runFilter() {
         ZuulFilterResult zr = new ZuulFilterResult();
+        // 当前filter是否被禁用
         if (!isFilterDisabled()) {
+            // 是否满足filter执行条件
             if (shouldFilter()) {
                 // TODO:: tracer
                 Tracer t = TracerFactory.instance().startMicroTracer("ZUUL::" + this.getClass().getSimpleName());

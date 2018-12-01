@@ -36,7 +36,7 @@ public class StartServer implements ServletContextListener {
         logger.info("starting server");
 
         // mocks monitoring infrastructure as we don't need it for this simple app
-        // TODO:: zuul monitor
+        // 由于是演示应用不需要监控功能，这里初始化了一个空的实现
         MonitoringHelper.initMocks();
 
         // initializes groovy filesystem poller

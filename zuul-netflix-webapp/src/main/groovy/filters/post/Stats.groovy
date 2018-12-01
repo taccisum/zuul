@@ -28,7 +28,7 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 
 /**
- * 收集filter执行过程中的统计信息并输出
+ * 收集统计数据，以及将filter执行过程中收集到的debug信息输出到控制台
  *
  * @author Mikey Cohen
  * Date: 2/3/12
@@ -54,8 +54,10 @@ class Stats extends ZuulFilter {
     Object run() {
         int status = RequestContext.getCurrentContext().getResponseStatusCode();
         StatsManager sm = StatsManager.manager
+        // 收集统计数据
         sm.collectRequestStats(RequestContext.getCurrentContext().getRequest());
         sm.collectRouteStats(RequestContext.getCurrentContext().route, status);
+        // 打印debug信息
         dumpRoutingDebug()
         dumpRequestDebug()
     }

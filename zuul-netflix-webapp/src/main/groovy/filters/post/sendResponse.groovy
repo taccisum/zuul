@@ -60,7 +60,9 @@ class sendResponse extends ZuulFilter {
     }
 
     Object run() {
+        // 添加一些响应头并收集响应debug信息到上下文
         addResponseHeaders()
+        // 写响应流
         writeResponse()
     }
 
@@ -96,11 +98,10 @@ class sendResponse extends ZuulFilter {
                     // if origin response is gzipped, and client has not requested gzip, decompress stream
                     // before sending to client
                     // else, stream gzip directly to client
-                    // 如果原始响应是gzip压缩的，但请求客户端并不接受gzip，就解压后再返回，否则直接返回gzip响应
+                    // 如果原始响应是gzip压缩的，但请求来源并不接受gzip，就解压后再返回，否则直接返回gzip响应
                     if (context.getResponseGZipped() && !isGzipRequested)
                         try {
                             inputStream = new GZIPInputStream(is);
-
                         } catch (java.util.zip.ZipException e) {
                             println("gzip expected but not received assuming unencoded response" + RequestContext.currentContext.getRequest().getRequestURL().toString())
                             inputStream = is
@@ -110,15 +111,12 @@ class sendResponse extends ZuulFilter {
                     writeResponse(inputStream, outStream)
                 }
             }
-
         } finally {
             try {
                 is?.close();
-
                 outStream.flush()
                 outStream.close()
             } catch (IOException e) {
-
             }
         }
     }

@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory
 import javax.servlet.http.HttpServletRequest
 
 /**
+ * 收集要发送到ESI, EventBus, Turbine等的请求数据
  * Collects request data to be sent to ESI, EventBus, Turbine and friends.
  *
  * @author mhawthorne
@@ -59,11 +60,10 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
         final Map<String, Object> event = ctx.getEventProperties();
 
         try {
+            // 往eventProperties中写入与此次请求有关的数据
             captureRequestData(event, ctx.request);
-            // TODO:: 好像还跟eureka有关？
+            // 往eventProperties中写入与当前实例有关的数据
             captureInstanceData(event);
-
-
         } catch (Exception e) {
             event.put("exception", e.toString());
             LOG.error(e.getMessage(), e);
@@ -73,6 +73,7 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
     void captureRequestData(Map<String, Object> event, HttpServletRequest req) {
 
         try {
+            // 写入请求基本信息
             // basic request properties
             event.put("path", req.getPathInfo());
             event.put("host", req.getHeader("host"));
@@ -80,6 +81,7 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
             event.put("method", req.getMethod());
             event.put("currentTime", System.currentTimeMillis());
 
+            // 写入请求头
             // request headers
             for (final Enumeration names = req.getHeaderNames(); names.hasMoreElements();) {
                 final String name = names.nextElement();
@@ -98,6 +100,7 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
                 event.put("request.header." + name, valBuilder.toString());
             }
 
+            // 写入请求参数
             // request params
             final Map params = req.getParameterMap();
             for (final Object key : params.keySet()) {
@@ -121,6 +124,7 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
                 }
             }
 
+            // 写入响应头
             // response headers
             NFRequestContext.getCurrentContext().getZuulResponseHeaders()?.each { Pair<String, String> it ->
                 event.put("response.header." + it.first().toLowerCase(), it.second())
@@ -138,7 +142,9 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
 
             // TODO: add CLUSTER, ASG, etc.
 
+            // 获取此实例（zuul）的信息
             final InstanceInfo instanceInfo = ApplicationInfoManager.getInstance().getInfo();
+            // 写入实例信息，id和metadata等
             if (instanceInfo != null) {
                 event.put("instance.id", instanceInfo.getId());
                 for (final Map.Entry<String, String> e : instanceInfo.getMetadata().entrySet()) {
@@ -146,6 +152,7 @@ class RequestEventInfoCollectorFilter extends ZuulFilter {
                 }
             }
 
+            // AWS相关，跳过
             // caches value after first call.  multiple threads could get here simultaneously, but I think that is fine
             final AmazonInfo amazonInfo = AmazonInfoHolder.getInfo();
 

@@ -40,7 +40,9 @@ class Postfilter extends ZuulFilter {
     }
 
     boolean shouldFilter() {
-        if (true.equals(NFRequestContext.getCurrentContext().zuulToZuul)) return false; //request was routed to a zuul server, so don't send response headers
+        // 判断请求是否是从zuul路由到自身的
+        if (true.equals(NFRequestContext.getCurrentContext().zuulToZuul))
+            return false; //request was routed to a zuul server, so don't send response headers
         return true
     }
 
@@ -54,17 +56,17 @@ class Postfilter extends ZuulFilter {
     void addStandardResponseHeaders(HttpServletRequest req, HttpServletResponse res) {
         println(originatingURL)
 
-        String origin = req.getHeader(ORIGIN)
+        String origin = req.getHeader(ORIGIN)   // 没用到
         RequestContext context = RequestContext.getCurrentContext()
         List<Pair<String, String>> headers = context.getZuulResponseHeaders()
-        headers.add(new Pair(X_ZUUL, "zuul"))
-        headers.add(new Pair(X_ZUUL_INSTANCE, System.getenv("EC2_INSTANCE_ID") ?: "unknown"))
-        headers.add(new Pair(CONNECTION, KEEP_ALIVE))
-        headers.add(new Pair(X_ZUUL_FILTER_EXECUTION_STATUS, context.getFilterExecutionSummary().toString()))
-        headers.add(new Pair(X_ORIGINATING_URL, originatingURL))
+        headers.add(new Pair(X_ZUUL, "zuul"))   // X-Zuul
+        headers.add(new Pair(X_ZUUL_INSTANCE, System.getenv("EC2_INSTANCE_ID") ?: "unknown"))   // X-Zuul-instance
+        headers.add(new Pair(CONNECTION, KEEP_ALIVE))   // Connection
+        headers.add(new Pair(X_ZUUL_FILTER_EXECUTION_STATUS, context.getFilterExecutionSummary().toString()))   // X-Zuul-Filter-Executions
+        headers.add(new Pair(X_ORIGINATING_URL, originatingURL))    // X-Originating-URL
 
         if (context.get("ErrorHandled") == null && context.responseStatusCode >= 400) {
-            headers.add(new Pair(X_NETFLIX_ERROR_CAUSE, "Error from Origin"))
+            headers.add(new Pair(X_NETFLIX_ERROR_CAUSE, "Error from Origin"))   // X-Netflix-Error-Cause
             ErrorStatsManager.manager.putStats(RequestContext.getCurrentContext().route, "Error_from_Origin_Server")
 
         }

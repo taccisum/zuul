@@ -48,12 +48,12 @@ class ErrorResponse extends ZuulFilter {
 
 
     boolean shouldFilter() {
+        // 判断错误是否已被处理
         return RequestContext.getCurrentContext().get("ErrorHandled") == null
     }
 
 
     Object run() {
-
         RequestContext context = RequestContext.currentContext
         Throwable ex = context.getThrowable()
         try {
@@ -62,24 +62,27 @@ class ErrorResponse extends ZuulFilter {
         } catch (ZuulException e) {
             String cause = e.errorCause
             if (cause == null) cause = "UNKNOWN"
+            // 添加错误原因到请求头X-Netflix-Error-Cause
             RequestContext.getCurrentContext().getResponse().addHeader("X-Netflix-Error-Cause", "Zuul Error: " + cause)
+            // 对该次错误请求进行统计
             if (e.nStatusCode == 404) {
                 ErrorStatsManager.manager.putStats("ROUTE_NOT_FOUND", "")
             } else {
                 ErrorStatsManager.manager.putStats(RequestContext.getCurrentContext().route, "Zuul_Error_" + cause)
             }
 
+            // 判断是否改写响应状态，则请求传入的参数决定
             if (overrideStatusCode) {
                 RequestContext.getCurrentContext().setResponseStatusCode(200);
-
-
             } else {
                 RequestContext.getCurrentContext().setResponseStatusCode(e.nStatusCode);
             }
+            // 设置标识，表示不再返回zuul转发请求得到的响应结果（如果有）
             context.setSendZuulResponse(false)
+            // 设置zuul的异常响应body
             context.setResponseBody("${getErrorMessage(e, e.nStatusCode)}")
-
         } catch (Throwable throwable) {
+            // 处理未知异常，与处理ZuulException的逻辑大体相同
             RequestContext.getCurrentContext().getResponse().addHeader("X-Zuul-Error-Cause", "Zuul Error UNKNOWN Cause")
             ErrorStatsManager.manager.putStats(RequestContext.getCurrentContext().route, "Zuul_Error_UNKNOWN_Cause")
 
@@ -90,12 +93,11 @@ class ErrorResponse extends ZuulFilter {
             }
             context.setSendZuulResponse(false)
             context.setResponseBody("${getErrorMessage(throwable, 500)}")
-
         } finally {
+            // 设置标识，表示错误已经被处理（防止存在多个error过滤器时重复处理）
             context.set("ErrorHandled") //ErrorResponse was handled
             return null;
         }
-
     }
     /*
     JSON/ xml ErrorResponse responses

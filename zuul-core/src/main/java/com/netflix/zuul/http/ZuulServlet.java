@@ -74,11 +74,12 @@ public class ZuulServlet extends HttpServlet {
             // 为此次请求设置标识
             context.setZuulEngineRan();
 
+            // zuul对请求的处理流程 start
             // 以下几个try块部分是zuul对一个请求的处理流程：pre -> route -> post
             // 可以看到：
             // 1. post是必然执行的（可以类比finally块），但如果在post中抛出了异常，交由error处理完后就结束，避免无限循环
             // 2. 任何阶段抛出了ZuulException，都会交由error处理
-            // 3. 非ZuulException会被封装后交给error处理（理论上不可能出现，因为这些方法里面都将未知异常转换成了ZuulException）
+            // 3. 非ZuulException会被封装后交给error处理
             try {
                 preRoute();
             } catch (ZuulException e) {
@@ -99,11 +100,12 @@ public class ZuulServlet extends HttpServlet {
                 error(e);
                 return;
             }
+            // zuul对请求的处理流程 end
 
         } catch (Throwable e) {
             error(new ZuulException(e, 500, "UNHANDLED_EXCEPTION_" + e.getClass().getName()));
         } finally {
-            // TODO:: 重置context，后续了解
+            // 此次请求完成，移除相应的上下文对象
             RequestContext.getCurrentContext().unset();
         }
     }

@@ -71,7 +71,7 @@ public class NFRequestContext extends RequestContext {
     }
 
     /**
-     * 与Eureka虚拟ip概念相关
+     * Eureka VIP，即注册到eureka的应用id
      * returns the routeVIP; that is the Eureka "vip" of registered instances
      *
      * @return

@@ -149,12 +149,13 @@ public class FilterProcessor {
      * @throws Throwable throws up an arbitrary exception
      */
     public Object runFilters(String sType) throws Throwable {
-        // TODO:: debug routing？跟debug有关嘛？
+        // 添加debug信息
         if (RequestContext.getCurrentContext().debugRouting()) {
             Debug.addRoutingDebug("Invoking {" + sType + "} type filters");
         }
         boolean bResult = false;
         // TODO:: FilterLoader工作方式，后续了解
+        // 通过FilterLoader获取指定类型的所有filter
         List<ZuulFilter> list = FilterLoader.getInstance().getFiltersByType(sType);
         if (list != null) {
             // TODO:: filter执行顺序？
@@ -164,7 +165,7 @@ public class FilterProcessor {
                 ZuulFilter zuulFilter = list.get(i);
                 Object result = processZuulFilter(zuulFilter);
                 if (result != null && result instanceof Boolean) {
-                    // 这里写的是|=不是!=
+                    // 注意这里写的是|=不是!=
                     // TODO:: 为什么要用这种写法？既然只有result为boolean类型时才执行，直接赋值不行吗
                     bResult |= ((Boolean) result);
                 }
@@ -185,7 +186,7 @@ public class FilterProcessor {
 
         RequestContext ctx = RequestContext.getCurrentContext();
         boolean bDebug = ctx.debugRouting();
-        final String metricPrefix = "zuul.filter-";
+        final String metricPrefix = "zuul.filter-";     // 这个变量没有用到...
         long execTime = 0;
         String filterName = "";
         try {
@@ -205,7 +206,7 @@ public class FilterProcessor {
             ZuulFilterResult result = filter.runFilter();
             ExecutionStatus s = result.getStatus();
 
-            // 统计了执行时间
+            // 统计执行时间
             execTime = System.currentTimeMillis() - ltime;
 
             // 这段对过滤器的执行状态进行记录
@@ -228,7 +229,8 @@ public class FilterProcessor {
 
             if (t != null) throw t;
 
-            // TODO:: usageNotifier是啥
+            // 触发一个filter usage回调
+            // 当前notifier的实现固定是BasicFilterUsageNotifier，通过Servo统计filter的调用
             usageNotifier.notify(filter, s);
             return o;
 
@@ -241,7 +243,8 @@ public class FilterProcessor {
                 throw (ZuulException) e;
             } else {
                 ZuulException ex = new ZuulException(e, "Filter threw Exception", 500, filter.filterType() + ":" + filterName);
-                // TODO:: 这个execTime??如果在line208之前抛出了异常岂不是为0？
+                // 如果在line210之前抛出了异常，这个execTime的值会是0
+                // 不过ZuulFilter.runFilter()中做了try...catch...处理，理论上来说不会出现异常
                 ctx.addFilterExecutionSummary(filterName, ExecutionStatus.FAILED.name(), execTime);
                 throw ex;
             }
@@ -249,7 +252,6 @@ public class FilterProcessor {
     }
 
     /**
-     * TODO:: 这个usage notifier干啥的？后续了解
      * Publishes a counter metric for each filter on each use.
      */
     public static class BasicFilterUsageNotifier implements FilterUsageNotifier {
@@ -257,6 +259,7 @@ public class FilterProcessor {
 
         @Override
         public void notify(ZuulFilter filter, ExecutionStatus status) {
+            // 通过Netflix Servo对每个filter进行调用计数
             DynamicCounter.increment(METRIC_PREFIX + filter.getClass().getSimpleName(), "status", status.name(), "filtertype", filter.filterType());
         }
     }

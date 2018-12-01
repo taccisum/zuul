@@ -7,6 +7,8 @@ import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * filter注册表，其中维护了一个ConcurrentHashMap用于存储filter
+ *
  * @author mhawthorne
  */
 public class FilterRegistry {

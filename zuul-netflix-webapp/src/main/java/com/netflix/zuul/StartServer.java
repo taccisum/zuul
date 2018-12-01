@@ -131,6 +131,7 @@ public class StartServer extends GuiceServletContextListener {
         initZuul();
         initCassandra();
         // NIWS: Netflix Internal Web Service
+        // 主要是初始化ribbon的一些配置
         initNIWS();
 
         ApplicationInfoManager.getInstance().setInstanceStatus(InstanceInfo.InstanceStatus.UP);

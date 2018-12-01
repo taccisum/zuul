@@ -35,8 +35,8 @@ import static org.mockito.Mockito.*;
 
 
 /**
- * TODO::
- * ZuulServlet是单例，所以这个ZuulRunner应该也是单例
+ * ZuulServlet是单例，所以这个ZuulRunner应该也只会存在单个实例
+ *
  * This class initializes servlet requests and responses into the RequestContext and wraps the FilterProcessor calls
  * to preRoute(), route(),  postRoute(), and error() methods
  *
@@ -73,7 +73,7 @@ public class ZuulRunner {
         RequestContext ctx = RequestContext.getCurrentContext();
         if (bufferRequests) {
             // wrap request并缓存其body
-            // 所谓buffer是指将其内容缓存起来，使得可以安全地调用getReader(), getInputStream()等方法
+            // 所谓buffer是指将其内容缓存起来，使得可以安全地重复调用getReader(), getInputStream()等方法
             // 因为一般来说，流操作一次之后就不能重复操作了
             // 类com.netflix.zuul.http.HttpServletRequestWrapper注释上有详解
             ctx.setRequest(new HttpServletRequestWrapper(servletRequest));

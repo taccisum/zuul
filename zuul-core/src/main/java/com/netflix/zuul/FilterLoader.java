@@ -57,12 +57,13 @@ public class FilterLoader {
     private final ConcurrentHashMap<String, Long> filterClassLastModified = new ConcurrentHashMap<String, Long>();
     private final ConcurrentHashMap<String, String> filterClassCode = new ConcurrentHashMap<String, String>();
     private final ConcurrentHashMap<String, String> filterCheck = new ConcurrentHashMap<String, String>();
+    // TODO:: 缓存所有filter的map，依据type进行分类
     private final ConcurrentHashMap<String, List<ZuulFilter>> hashFiltersByType = new ConcurrentHashMap<String, List<ZuulFilter>>();
 
     private FilterRegistry filterRegistry = FilterRegistry.instance();
 
     static DynamicCodeCompiler COMPILER;
-    
+
     static FilterFactory FILTER_FACTORY = new DefaultFilterFactory();
 
     /**
@@ -81,13 +82,13 @@ public class FilterLoader {
 
     /**
      * Sets a FilterFactory
-     * 
+     *
      * @param factory
      */
     public void setFilterFactory(FilterFactory factory) {
         FILTER_FACTORY = factory;
     }
-    
+
     /**
      * @return Singleton FilterLoader
      */
@@ -168,18 +169,20 @@ public class FilterLoader {
     }
 
     /**
+     * 获取所有指定类型的filter并排序，通过ZuulFilter.filterOrder()方法
      * Returns a list of filters by the filterType specified
      *
      * @param filterType
      * @return a List<ZuulFilter>
      */
     public List<ZuulFilter> getFiltersByType(String filterType) {
-
+        // 尝试从缓存中获取，如果存在缓存，则直接返回
         List<ZuulFilter> list = hashFiltersByType.get(filterType);
         if (list != null) return list;
 
         list = new ArrayList<ZuulFilter>();
 
+        // 从registry获取所有filter，从中找出需要的filter，最终进行排序
         Collection<ZuulFilter> filters = filterRegistry.getAllFilters();
         for (Iterator<ZuulFilter> iterator = filters.iterator(); iterator.hasNext(); ) {
             ZuulFilter filter = iterator.next();
@@ -189,6 +192,7 @@ public class FilterLoader {
         }
         Collections.sort(list); // sort by priority
 
+        // 将结果缓存起来
         hashFiltersByType.putIfAbsent(filterType, list);
         return list;
     }

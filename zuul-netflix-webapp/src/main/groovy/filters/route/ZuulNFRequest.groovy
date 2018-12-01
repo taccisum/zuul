@@ -79,6 +79,7 @@ class ZuulNFRequest extends ZuulFilter {
         MultivaluedMap<String, String> params = buildZuulRequestQueryParams(request)
         Verb verb = getVerb(request);
         Object requestEntity = getRequestBody(request)
+        // 通过eureka实例id获取到相应的client
         IClient restClient = ClientFactory.getNamedClient(context.getRouteVIP());
 
         String uri = request.getRequestURI()
@@ -146,7 +147,7 @@ class ZuulNFRequest extends ZuulFilter {
 
         RibbonCommand command = new RibbonCommand(restClient, verb, uri, headers, params, requestEntity);
         try {
-            HttpResponse response = command.execute();
+            HttpResponse response = command.execute();  //同步执行hystrix command
             return response
         } catch (HystrixRuntimeException e) {
             if (e?.fallbackException?.cause instanceof ClientException) {

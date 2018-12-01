@@ -38,8 +38,6 @@ class ErrorResponse extends ZuulFilter {
 
     @Override
     String filterType() {
-        // TODO:: 看来这个filter好像是放错包了
-        // 啥放错包... 根据就没有error包
         return 'error'
     }
 

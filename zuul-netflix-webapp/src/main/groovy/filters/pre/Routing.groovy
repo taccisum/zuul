@@ -26,7 +26,7 @@ import com.netflix.zuul.context.RequestContext
 import com.netflix.zuul.exception.ZuulException
 
 /**
- * 这个过滤器中负责执行static过滤器
+ * Routing过滤器判断是将请求路由到静态资源还是其它服务
  *
  * @author Mikey Cohen
  * Date: 1/23/13
@@ -53,6 +53,7 @@ class Routing extends ZuulFilter {
 
 
     Object staticRouting() {
+        // 路由到静态资源
         FilterProcessor.instance.runFilters("healthcheck")
         FilterProcessor.instance.runFilters("static")
     }
@@ -61,7 +62,8 @@ class Routing extends ZuulFilter {
 
         staticRouting() //runs the static Zuul
 
-        // TODO:: 下面的好像是netflix专用的代码，暂时忽略
+        // TODO:: 这里routeVIP的值是固定的（origin），后面也没有找到修改该值的地方，导致zuul只能路由到某个单一的服务，暂时不知道原因，先mark一下
+        // 目标Eureka VIP
         ((NFRequestContext) RequestContext.currentContext).routeVIP = defaultClient.get()
         String host = defaultHost.get()
         if (((NFRequestContext) RequestContext.currentContext).routeVIP == null) ((NFRequestContext) RequestContext.currentContext).routeVIP = ZuulApplicationInfo.applicationName
@@ -71,11 +73,13 @@ class Routing extends ZuulFilter {
             ((NFRequestContext) RequestContext.currentContext).routeVIP = null
         }
 
+        // host与routeVIP不能同时为null
         if (host == null && RequestContext.currentContext.routeVIP == null) {
             throw new ZuulException("default VIP or host not defined. Define: zuul.niws.defaultClient or zuul.default.host", 501, "zuul.niws.defaultClient or zuul.default.host not defined")
         }
 
         String uri = RequestContext.currentContext.request.getRequestURI()
+        // 如果在之前的filter当中给上下文的requestURI赋值了，则覆盖原uri的值
         if (RequestContext.currentContext.requestURI != null) {
             uri = RequestContext.currentContext.requestURI
         }
@@ -84,6 +88,8 @@ class Routing extends ZuulFilter {
             uri = uri - "/"
         }
 
+        // 截取路径的第一段为route
+        // TODO:: 这个route有什么用，也暂时没发现
         ((NFRequestContext) RequestContext.currentContext).route = uri.substring(0, uri.indexOf("/") + 1)
     }
 }

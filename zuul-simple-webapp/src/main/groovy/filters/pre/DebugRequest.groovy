@@ -43,12 +43,15 @@ class DebugRequest extends ZuulFilter {
 
     @Override
     Object run() {
+        // 获取原始请求
         HttpServletRequest req = RequestContext.currentContext.request as HttpServletRequest
 
+        // 收集客户端ip信息
         Debug.addRequestDebug("REQUEST:: " + req.getScheme() + " " + req.getRemoteAddr() + ":" + req.getRemotePort())
-
+        // 收集HTTP请求行信息
         Debug.addRequestDebug("REQUEST:: > " + req.getMethod() + " " + req.getRequestURI() + " " + req.getProtocol())
 
+        // 收集原请求的请求头信息
         Iterator headerIt = req.getHeaderNames().iterator()
         while (headerIt.hasNext()) {
             String name = (String) headerIt.next()
@@ -56,6 +59,7 @@ class DebugRequest extends ZuulFilter {
             Debug.addRequestDebug("REQUEST:: > " + name + ":" + value)
         }
 
+        // 收集原请求的请求体信息
         final RequestContext ctx = RequestContext.getCurrentContext()
         if (!ctx.isChunkedRequestBody()) {
             InputStream inp = ctx.request.getInputStream()

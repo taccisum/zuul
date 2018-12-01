@@ -57,7 +57,7 @@ public class PreDecoration extends ZuulFilter {
     Object run() {
         if (RequestContext.currentContext.getRequest().getParameter("url") != null) {
             try {
-                // TODO:: param url??
+                // TODO:: routeHost有什么用？
                 RequestContext.getCurrentContext().routeHost = new URL(RequestContext.currentContext.getRequest().getParameter("url"))
                 // 开启GZip
                 RequestContext.currentContext.setResponseGZipped(true)
@@ -71,11 +71,10 @@ public class PreDecoration extends ZuulFilter {
 
     void setOriginRequestHeaders() {
         RequestContext context = RequestContext.currentContext
-        // TODO:: 唯一标识？有什么用？
         context.addZuulRequestHeader("X-Netflix.request.toplevel.uuid", UUID.randomUUID().toString())
         // 添加被代理者的ip地址到XFF
         context.addZuulRequestHeader(X_FORWARDED_FOR, context.getRequest().remoteAddr)
-        // TODO:: debug看看这两个是啥
+        // 设置Host头
         context.addZuulRequestHeader(X_NETFLIX_CLIENT_HOST, context.getRequest().getHeader(HOST))
         if (context.getRequest().getHeader(X_FORWARDED_PROTO) != null) {
             context.addZuulRequestHeader(X_NETFLIX_CLIENT_PROTO, context.getRequest().getHeader(X_FORWARDED_PROTO))

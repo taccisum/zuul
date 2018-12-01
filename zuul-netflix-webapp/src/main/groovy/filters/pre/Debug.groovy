@@ -38,15 +38,15 @@ class DebugFilter extends ZuulFilter {
     }
 
     boolean shouldFilter() {
-
-        return true;
-//        if ("true".equals(RequestContext.currentContext.getRequest().getParameter(debugParameter.get()))) return true;
+        // 配置中是否开启debug
+        return true
+//        if ("true".equals(RequestContext.currentContext.getRequest().getParameter(debugParameter.get())))
+//            return true;
 //        return routingDebug.get();
-
     }
 
     Object run() {
-        // 从动态配置源获取到filter的debug配置，然后设置到当前请求的上下文中作为之后执行的filter是否执行debug代码的依据
+        // 设置当前请求的上下文的debug标识为true，作为之后执行filter时是否记录debug信息的依据
         RequestContext.getCurrentContext().setDebugRequest(true)
         RequestContext.getCurrentContext().setDebugRouting(true)
         return null;
